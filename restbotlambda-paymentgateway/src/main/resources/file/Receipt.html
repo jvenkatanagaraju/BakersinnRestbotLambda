@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700|Merriweather:400italic,700italic">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic|Roboto+Slab:300,400,700">
+  <link rel="icon" href="/assets/images/clover-symbol-favicon.png">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="format-detection" content="telephone=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RestaurantName | Online Receipt</title>
+  <style>
+    body {
+      background: #eceef1;
+      font-family: "Roboto", sans-serif;
+      font-size: 14px;
+      line-height: 18px;
+      color: #333;
+    }
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #receipt-container {
+      width: 320px;
+      margin: 20px auto;
+      position: relative;
+      background: #fff;
+      box-shadow: 0 2.4px 2.4px 0px rgba(91, 91, 91, 0.3);
+    }
+    .receipt-padding {
+      padding: 20px;
+    }
+    .receipt-header {
+      padding: 24px 20px;
+      background: #414749;
+      color: #b1b6b8;
+      text-align: center;
+    }
+    .receipt-header a {
+      color: #459edb;
+      text-decoration: underline;
+      cursor: pointer;
+      cursor: hand;
+    }
+    .receipt-header .merchant-name {
+      color: #fff;
+      font-size: 18px;
+      line-height: 22px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 0px;
+    }
+    .receipt-header .custom-tagline {
+      font-style: italic;
+      margin: 12px 0 0;
+      font-size: 1.1em;
+    }
+    .receipt-header .default-merchant-logo-container {
+      width: 80px;
+      border: 5px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0px 0.5px 1px rgba(140, 140, 140, 0.3);
+      margin: 0 auto 24px auto;
+    }
+    .receipt-header .default-merchant-logo-container img {
+      width: 100%;
+      display: block;
+    }
+    .receipt-header .merchant-logo-container {
+      padding-bottom: 8px;
+    }
+    .receipt-header .merchant-logo-container img.custom-logo {
+      max-width: 100%;
+      max-height: 84px;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+    .receipt-header .follow-status-container {
+      margin-top: 24px;
+    }
+    .receipt-header .follow-status {
+      border: 1px solid;
+      border-radius: 20px;
+      text-transform: uppercase;
+      font-size: 10px;
+      padding: 2px 0;
+      letter-spacing: 0.5px;
+      font-weight: 400;
+      width: 80px;
+      margin: 0 auto;
+      text-decoration: none;
+      width: 100px;
+      display: block;
+    }
+    .receipt-header .follow-status.following,
+    .receipt-header .follow-status.not-following:hover{
+      border-color: #47AEE0;
+      color: #fff;
+      background: #47AEE0;
+    }
+    .receipt-header .follow-status.following:hover{
+      border-color: #397DA0;
+      background: #397DA0;
+    }
+    .receipt-header .follow-status.not-following{
+      border-color: #56B7E2;
+      color: #56B7E2;
+      background: #414749;
+    }
+    .receipt-header .merchant-address {
+      margin: 24px 0 0;
+      overflow-wrap: break-word;
+    }
+    .receipt-header .merchant-phone {
+      margin: 0;
+      overflow-wrap: break-word;
+    }
+    .receipt-header .merchant-website {
+      margin: 8px 0 0 0;
+      overflow-wrap: break-word;
+    }
+    .merchant-website a {
+      color: #459edb;
+    }
+    #details-button {
+      cursor: pointer;
+      cursor: hand;
+    }
+    .receipt-body {
+      padding: 20px;
+    }
+    .receipt-body.receipt-remove-padding-bottom {
+      padding-bottom: 0;
+    }
+    .receipt-body.receipt-reduce-padding-top {
+      padding-top: 16px;
+    }
+    .section {
+      border-bottom: 1px dotted #7dbbe6;
+      padding: 10px 0;
+    }
+    .solid-separator {
+      border-bottom: 2px solid #7dbbe6;
+      padding: 10px 0;
+    }
+    .receipt-items:first-child {
+      padding-top: 0;
+    }
+    .receipt-items .line-item {
+      font-weight: 500;
+      padding: 10px 0;
+    }
+    .receipt-items .line-item:first-child {
+      padding-top: 0;
+    }
+    .receipt-items .line-item.section-header {
+      text-transform: uppercase;
+      color: #999;
+      display: block;
+      padding-bottom: 4px;
+    }
+    .receipt-items .line-item.section-header + li {
+      padding-top: 0;
+    }
+    .receipt-items .price {
+      float: right;
+      padding-left: 16px;
+      width: auto;
+    }
+    .receipt-items .label {
+      overflow-wrap: break-word;
+      width: auto;
+      overflow:hidden;
+      word-break: break-word;
+    }
+    .receipt-items .modifiers {
+      font-weight: 400;
+      margin: 2px 0 0 18px;
+    }
+    .receipt-items .modifiers li {
+      color: #999;
+      padding: 2px 0;
+    }
+    .receipt-items .modifiers li:last-child {
+      padding-bottom: 0;
+    }
+    .receipt-items .modifiers li.discount {
+      color: #28b564;
+    }
+    .receipt-items .subtotal {
+      font-weight: 500;
+      padding: 10px 0;
+    }
+    .receipt-items .subtotal .modifiers {
+      margin-left: 0;
+    }
+    .case-simple .label {
+      text-transform: uppercase;
+      color: #ccc;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .time {
+      text-transform: lowercase;
+    }
+    .case-simple .order-date {
+      padding: 4px 0;
+      text-align: center;
+    }
+    .case-simple .section {
+      display: inline-block;
+      text-align: center;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .case-simple.transaction-info {
+      display: table;
+      width: 100%;
+      padding: 10px 0;
+    }
+    .case-simple.transaction-info > * {
+      display: table-cell;
+      width: 50%;
+      text-align: center;
+    }
+    .customer-info {
+      text-align: center;
+      color: #999;
+      padding-bottom: 30px;
+    }
+    .customer-info .customer-name {
+      font-weight: 500;
+    }
+    .customer-info > * {
+      display: block;
+    }
+    .refund-label {
+      display: block;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: #636363;
+      line-height: 20px;
+      text-align: center;
+    }
+    #grand-total {
+      padding: 4px 0;
+      color: #459edb;
+      display: table;
+      width: 100%;
+      line-height: 60px;
+    }
+    #grand-total > * {
+      vertical-align: middle;
+    }
+    #grand-total .total {
+      display: table-cell;
+      font-weight: 600;
+      font-size: 24px;
+    }
+    #grand-total .number-wrapper {
+      font-family: "open sans", sans-serif;
+      display: table-cell;
+      text-align: right;
+      padding-bottom: 8px;
+      font-weight: 400;
+      font-size: 30px;
+    }
+    #grand-total .number-wrapper.simple-centered {
+      display: block;
+      padding-bottom: 20px;
+      text-align: center;
+    }
+    #grand-total .number-wrapper * {
+      vertical-align: top;
+      display: inline-block;
+    }
+    #grand-total .number-wrapper .dollar-amount {
+      font-weight: 100;
+      font-size: 60px;
+      margin-top: 5px;
+      letter-spacing: -2px;
+    }
+    #grand-total .number-wrapper .cents {
+      letter-spacing: -1px;
+      margin-left: -4px;
+    }
+    #grand-total.large-amount .total {
+      font-size: 18px;
+    }
+    #grand-total.large-amount .number-wrapper {
+      font-size: 21px;
+    }
+    #grand-total.large-amount .number-wrapper .dollar-amount {
+      font-size: 20px;
+      letter-spacing: -1px;
+    }
+    .order-number-header {
+      color: #459edb;
+      font-weight: 500;
+      line-height: 60px;
+      text-align: center;
+      text-transform: uppercase;
+      width: 100%;
+    }
+    .order-number-header .order-number-label {
+      font-size: 14px;
+      line-height: 16px;
+    }
+    .order-number-header .order-number {
+      font-size: 60px;
+      overflow-wrap: break-word;
+    }
+    .order-number-header .order-number-small {
+      font-size: 24px;
+      line-height: 24px;
+    }
+    .order-number-header .table-number {
+      font-size: 48px;
+    }
+    .vat-label {
+      color: #999;
+      display: block;
+      font-weight: 500;
+    }
+    .vat-breakdown {
+      width: 100%;
+    }
+    .vat-breakdown .vat-columns {
+      width: 70px;
+      text-align: right;
+    }
+    .tender-types li {
+      border-bottom: 1px dotted #7dbbe6;
+      font-size: 14px;
+      margin-bottom: 0px;
+      padding: 8px 0;
+      display: table;
+      width: 100%;
+    }
+    .tender-types li > * {
+      display: table-cell;
+      vertical-align: top;
+      text-align: left;
+    }
+    .tender-types .tender-img {
+      width: 40px;
+      padding: 6px 0;
+      text-align: center;
+      margin: auto;
+    }
+    .tender-types .case-simple.tender-img {
+      padding: 0px 0;
+    }
+    .tender-types .tender-img img {
+      width: 100%;
+    }
+    .tender-types li.tender-item.has-signature {
+      border-bottom: none;
+    }
+    .tender-types li.tender-item.has-ebt {
+      border-bottom: none;
+    }
+    .tender-types li .tender-name {
+      padding-left: 12px;
+      padding-top: 6px;
+      line-height: 14px;
+    }
+    .tender-types li .tender-name .line1 {
+      font-size: 12px;
+      color: #b1b6b8;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .tender-types li .tender-name .line1-split-tips {
+      font-size: 12px;
+      color: #333;
+      text-transform: uppercase;
+      font-weight: 500;
+      line-height: 16px;
+    }
+    .tender-types li .tender-name .line2-split-tips {
+      color: #b1b6b8;
+      line-height: 16px;
+    }
+    .tender-types li .tender-amount.discount {
+      color: #28b564;
+    }
+    .tender-types li .tender-amount {
+      float: right;
+      color: #333;
+      font-size: 14px;
+      text-align: right;
+      font-weight: 400;
+    }
+    .tender-types li .tender-amount.discount {
+      color: #28b564;
+    }
+    .tender-types li .tender-amount.split-tips {
+      color: #b1b6b8;
+    }
+    .tender-types li .cash-tender {
+      font-size: 12px;
+      color: #ccc;
+      text-transform: uppercase;
+      font-weight: 500;
+      padding: 0;
+      margin: 0;
+      border-bottom: none;
+      padding-bottom: 4px;
+    }
+    .tender-types li .cashier-cash {
+      text-transform: none;
+      display: inline;
+    }
+    .tender-name .cashier {
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .split-payment {
+      font-size: 14px;
+      color: #ccc;
+      text-transform: uppercase;
+      font-weight: 500;
+      padding: 0;
+      border-bottom: none;
+      margin-top: 4px;
+      margin-bottom: -10px;
+    }
+    .split-payment.simple-case {
+      text-align: center;
+    }
+    .tender-types li .cash-tender .tender-amount {
+      font-size: 14px;
+    }
+    .order-info {
+      text-align: center;
+      font-weight: 500;
+      color: #636363;
+    }
+    .order-info .date:after {
+      content: '\02022';
+      color: #b1b6b8;
+      padding: 0 8px;
+    }
+    .order-info .cashier-info {
+      display: block;
+      color: #b1b6b8;
+      font-weight: 500;
+    }
+    .order-info .order-type {
+      color: #b1b6b8;
+    }
+    .order-info .order-note {
+      color: #b1b6b8;
+    }
+    .order-info .order-details-title {
+      font-weight: 500;
+    }
+    .order-info .order-detail {
+      color: #b1b6b8;
+      font-weight: 400;
+    }
+    .order-info a {
+      color: #459edb;
+      font-weight: 400;
+      border-bottom: 1px solid #459edb;
+    }
+    .order-info.case-simple {
+      padding-top: 10px;
+      color: #b1b6b8;
+      color: #333;
+      font-weight: 400;
+    }
+    .order-info .verification-info {
+      display: block;
+      color: #b1b6b8;
+      font-weight: 500;
+    }
+    .signature img {
+      height: auto;
+      width: 280px;
+    }
+    .ebt img {
+      height: auto;
+      width: 280px;
+    }
+    .barcode img {
+      height: auto;
+      width: 280px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+    .order-id {
+      color: #b1b6b8;
+      display: block;
+    }
+    .ebt-balance {
+      color: #b1b6b8;
+      display: block;
+    }
+    .payment-id {
+      color: #b1b6b8;
+      display: block;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+    .cashier {
+      color: #b1b6b8;
+      display: block;
+      font-weight: 500;
+      padding-bottom: 4px;
+    }
+    .verification-info-header {
+      color: #b1b6b8;
+      display: block;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+    .refund-id {
+      display: block;
+      color: #b1b6b8;
+    }
+    .credit-id {
+      display: block;
+      color: #b1b6b8;
+    }
+    .receipt-footer {
+      padding: 20px;
+      padding-top: 0;
+    }
+    .custom-footer-text {
+      font-size: 16px;
+      text-align: center;
+      color: #459edb;
+      padding-bottom: 10px;
+      margin: 0;
+      overflow-wrap: break-word;
+    }
+    .social-media {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .social-media li {
+      display: inline-block;
+      margin: 0 12px;
+      border-radius: 50%;
+      border: 1px solid #eee;
+      box-shadow: 0px 0.5px 1px rgba(140, 140, 140, 0.3);
+    }
+    .social-media li a {
+      display: inline-block;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      border: 4px solid #fff;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      box-sizing: content-box;
+    }
+    .social-media li a:hover {
+      opacity: 0.8;
+    }
+    .social-media li a i {
+      font-size: 21px;
+      color: #fff;
+      line-height: 40px;
+    }
+    .social-media li.twitter a {
+      background: #00aced;
+    }
+    .social-media li.yelp a {
+      background: #c41200;
+    }
+    .social-media li.fb a {
+      background: #3b5998;
+    }
+    .third-party {
+      border-bottom: 1px dotted #7dbbe6;
+      padding: 10px 0;
+      text-align: center;
+    }
+    .smart-receipt-label {
+      font-size: 16px;
+    }
+    .return-policy {
+      padding: 0 0 10px 0;
+      font-size: 14px;
+      color: #727272;
+    }
+    .return-policy .policy-header {
+      text-transform: uppercase;
+      color: #b1b6b8;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .return-policy p {
+      margin: 0;
+    }
+    .clover-logo {
+      text-align: center;
+      padding-bottom: 10px;
+    }
+    .clover-logo img {
+      width: 20px;
+    }
+    .receipt-cutoff {
+      margin: 0 auto;
+      margin-top: -24px;
+      position: relative;
+      width: 320px;
+    }
+    .receipt-cutoff img {
+      height: auto;
+      width: 320px;
+    }
+    .triangle {
+      display: inline-block;
+      width: 14.45px;
+      position: relative;
+      background: #fff;
+      box-shadow: 0px 2.4px 2.4px rgba(91, 91, 91, 0.3);
+    }
+    .triangle:after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      bottom: -16px;
+      left: 0;
+      border: 6px solid black;
+      border-color: transparent transparent #fff #fff;
+      transform-origin: 0 0;
+      -webkit-transform-origin: 0 0;
+      transform: rotate(-45deg);
+      -webkit-transform: rotate(-45deg);
+      box-shadow: -2.4px 2.4px 2.4px rgba(91, 91, 91, 0.3);
+    }
+    .buttons {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      box-shadow: 0px 2.4px 2.4px 0px rgba(91, 91, 91, 0.3);
+      z-index: 10;
+      background: rgba(250, 250, 250, 0.9);
+    }
+    .buttons > * {
+      display: inline-block;
+      margin-right: 20px;
+    }
+    a:link {
+      color: #459edb;
+    }
+    .theme-1 .receipt-header {
+      background: #414749;
+    }
+    .theme-1 .receipt-header {
+      color: #b1b6b8;
+    }
+    .theme-1 .receipt-header .merchant-name {
+      color: #f7f8f8;
+    }
+    .theme-1 #grand-total,
+    .theme-1 .custom-footer-text {
+      color: #459edb;
+    }
+    .theme-1 .section,
+    .theme-1 .tender-types li {
+      border-bottom: 1px dotted #7dbbe6;
+    }
+    .theme-1 .solid-separator {
+      border-bottom: 2px solid #7dbbe6;
+    }
+    .theme-2 .receipt-header {
+      background: #4f0c0c;
+    }
+    .theme-2 .receipt-header {
+      color: #b1b6b8;
+    }
+    .theme-2 .receipt-header .merchant-name {
+      color: #f7c9c9;
+    }
+    .theme-2 #grand-total,
+    .theme-2 .custom-footer-text {
+      color: #d02020;
+    }
+    .theme-2 .section,
+    .theme-2 .tender-types li {
+      border-bottom: 1px dotted #4f0c0c;
+    }
+    .theme-2 .solid-separator {
+      border-bottom: 2px solid #4f0c0c;
+    }
+    .theme-3 .receipt-header {
+      background: #ff9a36;
+    }
+    .theme-3 .receipt-header {
+      color: #613b15;
+    }
+    .theme-3 .receipt-header .merchant-name {
+      color: #000000;
+    }
+    .theme-3 #grand-total,
+    .theme-3 .custom-footer-text {
+      color: #ff9a36;
+    }
+    .theme-3 .section,
+    .theme-3 .tender-types li {
+      border-bottom: 1px dotted #ffcd9b;
+    }
+    .theme-3 .solid-separator {
+      border-bottom: 2px solid #ffcd9b;
+    }
+    .theme-4 .receipt-header {
+      background: #0f4526;
+    }
+    .theme-4 .receipt-header {
+      color: #b1b6b8;
+    }
+    .theme-4 .receipt-header .merchant-name {
+      color: #c6f3d9;
+    }
+    .theme-4 #grand-total,
+    .theme-4 .custom-footer-text {
+      color: #28b564;
+    }
+    .theme-4 .section,
+    .theme-4 .tender-types li {
+      border-bottom: 1px dotted #0f4526;
+    }
+    .theme-4 .solid-separator {
+      border-bottom: 2px solid #0f4526;
+    }
+    .theme-5 .receipt-header {
+      background: #1c3f58;
+    }
+    .theme-5 .receipt-header {
+      color: #b1b6b8;
+    }
+    .theme-5 .receipt-header .merchant-name {
+      color: #e2eef6;
+    }
+    .theme-5 #grand-total,
+    .theme-5 .custom-footer-text {
+      color: #459edb;
+    }
+    .theme-5 .section,
+    .theme-5 .tender-types li {
+      border-bottom: 1px dotted #1c3f58;
+    }
+    .theme-5 .solid-separator {
+      border-bottom: 2px solid #1c3f58;
+    }
+    .theme-6 .receipt-header {
+      background: #3c224c;
+    }
+    .theme-6 .receipt-header {
+      color: #b1b6b8;
+    }
+    .theme-6 .receipt-header .merchant-name {
+      color: #ebe1f2;
+    }
+    .theme-6 #grand-total,
+    .theme-6 .custom-footer-text {
+      color: #9754bd;
+    }
+    .theme-6 .section,
+    .theme-6 .tender-types li {
+      border-bottom: 1px dotted #3c224c;
+    }
+    .theme-6 .solid-separator {
+      border-bottom: 2px solid #3c224c;
+    }
+    .theme-7 .receipt-header {
+      background: #fff;
+    }
+    .theme-7 .receipt-header {
+      color: #414749;
+    }
+    .theme-7 .receipt-header .merchant-name {
+      color: #4d4d4d;
+    }
+    .theme-7 #grand-total,
+    .theme-7 .custom-footer-text {
+      color: #459edb;
+    }
+    .theme-7 .section,
+    .theme-7 .tender-types li {
+      border-bottom: 1px dotted #a0a3a4;
+    }
+    .theme-7 .solid-separator {
+      border-bottom: 2px solid #a0a3a4;
+    }
+    .theme-8 .receipt-header {
+      background: #f9e2e2;
+    }
+    .theme-8 .receipt-header {
+      color: #4f0c0c;
+    }
+    .theme-8 .receipt-header .merchant-name {
+      color: #611515;
+    }
+    .theme-8 #grand-total,
+    .theme-8 .custom-footer-text {
+      color: #d02020;
+    }
+    .theme-8 .section,
+    .theme-8 .tender-types li {
+      border-bottom: 1px dotted #de6363;
+    }
+    .theme-8 .solid-separator {
+      border-bottom: 2px solid #de6363;
+    }
+    .theme-9 .receipt-header {
+      background: #fdf9e0;
+    }
+    .theme-9 .receipt-header {
+      color: #ff9a36;
+    }
+    .theme-9 .receipt-header .merchant-name {
+      color: #716207;
+    }
+    .theme-9 #grand-total,
+    .theme-9 .custom-footer-text {
+      color: #ff9a36;
+    }
+    .theme-9 .section,
+    .theme-9 .tender-types li {
+      border-bottom: 1px dotted #ffb872;
+    }
+    .theme-9 .solid-separator {
+      border-bottom: 2px solid #ffb872;
+    }
+    .theme-10 .receipt-header {
+      background: #e3f5eb;
+    }
+    .theme-10 .receipt-header {
+      color: #0f4526;
+    }
+    .theme-10 .receipt-header .merchant-name {
+      color: #1e5636;
+    }
+    .theme-10 #grand-total,
+    .theme-10 .custom-footer-text {
+      color: #28b564;
+    }
+    .theme-10 .section,
+    .theme-10 .tender-types li {
+      border-bottom: 1px dotted #69cb93;
+    }
+    .theme-10 .solid-separator {
+      border-bottom: 2px solid #69cb93;
+    }
+    .theme-11 .receipt-header {
+      background: #e7f2fa;
+    }
+    .theme-11 .receipt-header {
+      color: #1c3f58;
+    }
+    .theme-11 .receipt-header .merchant-name {
+      color: #144668;
+    }
+    .theme-11 #grand-total,
+    .theme-11 .custom-footer-text {
+      color: #459edb;
+    }
+    .theme-11 .section,
+    .theme-11 .tender-types li {
+      border-bottom: 1px dotted #7dbbe6;
+    }
+    .theme-11 .solid-separator {
+      border-bottom: 2px solid #7dbbe6;
+    }
+    .theme-12 .receipt-header {
+      background: #f1e9f6;
+    }
+    .theme-12 .receipt-header {
+      color: #3c224c;
+    }
+    .theme-12 .receipt-header .merchant-name {
+      color: #452258;
+    }
+    .theme-12 #grand-total,
+    .theme-12 .custom-footer-text {
+      color: #9754bd;
+    }
+    .theme-12 .section,
+    .theme-12 .tender-types li {
+      border-bottom: 1px dotted #b687d1;
+    }
+    .theme-12 .solid-separator {
+      border-bottom: 2px solid #b687d1;
+    }
+  </style>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-22630262-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+</head>
+<body>
+  <div id="receipt-container">
+    <div class="receipt-header">
+        
+      <h1 class="merchant-name">RestaurantName</h1>
+        <div class="follow-status-container">
+            <a href="http://www.sitaracuisine.com" target="_blank" class="follow-status following">
+             
+              <span>Following</span>
+            </a>
+        </div>
+      <p class="merchant-address">
+        <a onclick="openMap()">
+          RestaurantAddress
+        </a>
+      </p>
+        <p class="merchant-phone"><a href="tel://7038584681">RestaurantPhone</a></p>
+     
+      
+    </div>
+    <div class="receipt-body">
+          <ul class="receipt-items section">
+              <li class="line-item" style="overflow: auto">
+                  
+                  <!--<div class="label">CustomItem</div>-->
+                  <table width="100%;" style="margin:0;padding:0;border:0;font-size:100%;font: inherit;vertical-align:baseline; border-spacing: 0">
+			<thead>				
+			
+			</thead>
+			<tbody>
+				CustomItem
+			</tbody>
+			</table>
+                  
+                <ul class="modifiers">
+                </ul>
+              </li>
+          </ul>
+          <ul class="receipt-items section">
+          <li class="subtotal">Subtotal <span class="price">$TotalBillValue.00 USD</span>
+            <ul class="modifiers">
+                  <li class="additional-charges">tax<span class="price">$TaxValue USD</span></li>
+            </ul>
+          </li>
+        </ul>
+      <div id="grand-total" class="section ">
+          <span class="total">Total</span>
+            <div class="number-wrapper">
+              <span class="currency">$TotalBillWithTaxValue USD</span>
+            </div>
+      </div>
+        <ul class="tender-types">   
+        </ul>
+        <div class="order-info solid-separator">
+          <span class="date">DateOfOrder</span><span </span>
+          <span class="order-id">Order ID: 8Q6W5KFC6YMJM</span>
+        </div>
+        <ul class="tender-types">
+        </ul>
+    </div>
+  </script>
+</body>
+</html>

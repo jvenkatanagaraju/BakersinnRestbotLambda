@@ -1,0 +1,248 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation Template of LEX BOT",
+  "Parameters": {
+   
+	  "Botname": {
+			"Type": "String",
+			"Default": "botnamee",
+			"Description": "Please Enter The Name of the Bot"
+		},
+		"AliasName": {
+			"Type": "String",
+			"Default": "aliasnamee",
+			"Description": "Please Enter The Name of the Alias"
+		},
+     "IntentName": {
+			"Type": "String",
+			"Default": "GetStarted",
+			"Description": "Please Enter The Name of the Intent"
+		},
+		"SlotName": {
+			"Type": "String",
+			"Default": "slotName",
+			"Description": "Please Enter The Name of the SlotName"
+		}
+  },
+  "Resources": {
+      "LambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [ "lambda.amazonaws.com", "channels.lex.amazonaws.com", "lex.amazonaws.com" ]
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "lambdapolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "lambda:InvokeFunction"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+								{
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "lex:PostText",
+										"lex:PutBot",
+										"lex:PutIntent",
+										"lex:PutBotAlias",
+										"lex:PutSlotType",
+										"polly:SynthesizeSpeech"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }                            
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+ "LexModelBuildingServiceBot": {
+      "Type": "Custom::PutBot",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "PutBotFunction",
+            "Arn"
+          ]
+        },        
+        "name": { "Ref" : "Botname" },
+		"locale": "en-US",
+		"childDirected": true,
+		
+  "abortStatement": {
+    "messages": [ 
+      {
+        "content": "Sorry, I didn't understand, the conversation was aborted.",
+        "contentType": "PlainText" 
+      }
+    ]
+  },
+ "clarificationPrompt": {
+    "maxAttempts": 5,
+    "messages": [ 
+      {
+        "content": "Hi Welcome, You can order food by typing Getstarted.",
+        "contentType": "PlainText"
+      }
+    ]
+    
+  },
+		"intents": [
+    {
+      "intentName": { "Ref" : "IntentName" },
+      "intentVersion": "$LATEST" 
+    }
+  ],
+  "processBehavior": "BUILD"
+		
+		}
+		},
+"PutBotFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "",
+              [
+                "var response = require(\"cfn-response\");",
+                "var AWS = require(\"aws-sdk\");",
+				"var lexmodelbuildingservice = new AWS.LexModelBuildingService();",
+                "exports.handler = function (event, context) {",
+				"  var responseData = {};",
+				"    var myObj = event.ResourceProperties;",								
+				"    myObj[\"childDirected\"] = true;",				
+				"    console.log(\"printing myObj \" , myObj);",				
+				"    lexmodelbuildingservice.putBot({",
+                "      name: event.ResourceProperties.name,",
+				"      locale: event.ResourceProperties.locale,",
+				"      childDirected: event.ResourceProperties.childDirected,",				
+				"      intents: event.ResourceProperties.intents,",				
+				"      clarificationPrompt: event.ResourceProperties.clarificationPrompt,",
+				"      abortStatement: event.ResourceProperties.abortStatement,",
+				"      processBehavior: event.ResourceProperties.processBehavior",
+				"     }, function (err, data) {",
+                "      if (err) {",
+                "        console.log(err, err.stack);",
+                "      }",	
+                "      else {",
+                "        responseStatus = \"SUCCESS\";",
+                "        console.log(data);",
+                "        responseData = { name: data.name };",
+                "      }",
+                "      response.send(event, context, responseStatus, responseData);",
+                "    });",
+				"};"
+			  ]
+            ]
+          }
+        },
+	    "Description": "LexModelBuildingService Function",
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs4.3",
+        "Timeout": 30
+      }
+    },
+
+	   "LexModelBuildingServiceBotAlias": {
+"DependsOn" : "LexModelBuildingServiceBot",	   
+      "Type": "Custom::PutBotAlias",
+	   "Properties": {
+	   "ServiceToken": {
+          "Fn::GetAtt": [
+            "PutBotAliasFunction",
+            "Arn"
+          ]
+        },   
+     "botName": { "Ref"	: "Botname" },
+      "botVersion":	 "$LATEST",
+	  "name":  { "Ref"	: "AliasName" }
+	  }
+	  },
+ 
+"PutBotAliasFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "",
+              [
+                "var response = require(\"cfn-response\");",
+                "var AWS = require(\"aws-sdk\");",
+				"var lexmodelbuildingservice = new AWS.LexModelBuildingService();",
+                "exports.handler = function (event, context) {",
+				"  var responseData = {};",		 				
+							
+				"    lexmodelbuildingservice.putBotAlias({",
+                "      botName: event.ResourceProperties.botName,",
+				"      botVersion: event.ResourceProperties.botVersion,",
+				"      name: event.ResourceProperties.name",				
+				"     }, function (err, data) {",
+                "      if (err) {",
+                "        console.log(err, err.stack);",
+                "      }",	
+                "      else {",
+                "        responseStatus = \"SUCCESS\";",
+                "        console.log(data);",
+                "        responseData = { name: data.name };",
+                "      }",
+                "      response.send(event, context, responseStatus, responseData);",
+                "    });",
+				"};"
+			  ]
+            ]
+          }
+        },
+	    "Description": "LexModelBuildingService PutBotAlias Function",
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs4.3",
+        "Timeout": 30
+      }
+    }
+  }
+}

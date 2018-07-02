@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form id="payment-form" action="/Lexpayment/charge?order=Itemuuid" method="GET">
+   
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+
+
+
+<script>
+var handler = StripeCheckout.configure({
+  key: 'pk_live_sqh5QaxBkSoWAPdRgNA7MQbg',
+  image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
+  locale: 'auto',
+  zipCode: true,
+  token: function stripeTokenHandler(token) {
+  var form = document.getElementById('payment-form');
+  var hiddenInput = document.createElement('input');
+  var hiddenInput1 = document.createElement('input');
+  var hiddenInput2 = document.createElement('input');
+  hiddenInput.setAttribute('type', 'hidden');
+  hiddenInput.setAttribute('name', 'stripeToken');
+  hiddenInput.setAttribute('value', token.id);
+  hiddenInput1.setAttribute('type', 'hidden');
+  hiddenInput1.setAttribute('name', 'stripeEmail');
+  hiddenInput1.setAttribute('value', token.email);
+  
+  form.appendChild(hiddenInput);
+  form.appendChild(hiddenInput1);
+  form.submit();
+}   
+});
+window.addEventListener('load', function(e) {
+  handler.open({
+    name: 'Payment',
+    description: 'SITARA INDIAN CUISINE',
+    amount: orderAmount
+	
+  });
+  e.preventDefault();
+});
+window.addEventListener('popstate', function() {
+  handler.close();
+});
+var orderuuid=window.location.search().order;
+console.log(orderuuid);
+</script>
+
+</form>
+ 
+</body>
+</html>
+
